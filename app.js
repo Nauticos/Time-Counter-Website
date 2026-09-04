@@ -1,10 +1,12 @@
 const { useState, useRef, useEffect } = React;
 
 const WEBSITE_START_TIME = new Date().toLocaleTimeString([], {
-  hour:'2-digit',
+  hour: '2-digit',
   minute: '2-digit',
   second: '2-digit',
 });
+
+const START_TIME_MS = Date.now();
 
 document.body.style.margin = '0';
 document.body.style.padding = '0';
@@ -12,7 +14,7 @@ document.body.style.width = '100vw';
 document.body.style.height = '100vh';
 document.body.style.overflow = 'hidden';
 
-function addTimer(ctx, time, width, height) {
+function addTimer(ctx, elapsedMs, width, height) {
   const BG_COLOURS = [
     '#ff0000',
     '#ff8000',
@@ -24,7 +26,8 @@ function addTimer(ctx, time, width, height) {
     '#fd01e4',
   ];
 
-  const colourIndex = Math.floor(time / 10) % BG_COLOURS.length;
+  const totalSeconds = Math.floor(elapsedMs / 1000);
+  const colourIndex = Math.floor(totalSeconds / 10) % BG_COLOURS.length;
 
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = BG_COLOURS[colourIndex];
@@ -33,7 +36,7 @@ function addTimer(ctx, time, width, height) {
   const centerX = width / 2;
   const centerY = height / 2;
 
-  if (time > 0 && time % 10 === 0) {
+  if (totalSeconds > 0 && totalSeconds % 10 === 0) {
     const particleCount = 16;
     const burstRadius = Math.min(width, height) * 0.28;
 
@@ -57,13 +60,18 @@ function addTimer(ctx, time, width, height) {
   ctx.font = 'bold 40px "Courier New", monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('Time spent on website', centerX, centerY - 300);
+  ctx.fillText('Time spent on website', centerX, centerY - 250);
 
   const radius = Math.min(width, height) * 0.18;
   const startAngle = -Math.PI / 2;
-  const currentSeconds = time % 10;
-  const progressFraction = currentSeconds / 10;
-  const endAngle = startAngle + progressFraction * (2 *Math.PI);
+  const cycleMs = elapsedMs % 10000;
+  const progressFraction = cycleMs / 10000;
+  const endAngle = startAngle + progressFraction * (2 * Math.PI);
+
+  const baseThickness = 12;
+  const pulseAmplitude = 4;
+  const pulseSpeed = 0x003;
+  const dynamicLineWidth = baseThickness + Math.sin(elapsedMs * pulseSpeed) * pulseAmplitude;
 
   ctx.shadowColor = 'transparent';
 
@@ -73,20 +81,20 @@ function addTimer(ctx, time, width, height) {
   ctx.strokeStyle = '#2d2d2d';
   ctx.stroke();
 
-  if (currentSeconds > 0) {
+  if (progressFraction > 0) {
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-    ctx.lineWidth = 12;
+    ctx.lineWidth = dynamicLineWidth;
     ctx.strokeStyle = '#ffffff';
     ctx.lineCap = 'round';
     ctx.stroke();
-  };
+  }
 
   ctx.font = 'bold 40px "Courier New", monospace';
   ctx.fillStyle = '#ffffff';
   ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
   ctx.shadowBlur = 6;
-  ctx.fillText(`${time}s`, centerX, centerY);
+  ctx.fillText(`${totalSeconds}s`, centerX, centerY);
 
   ctx.font = '16px "Courier New", monospace';
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
@@ -98,7 +106,6 @@ function addTimer(ctx, time, width, height) {
 
 function App() {
   const canvasRef = useRef(null);
-  const [count, setCount] = useState(0);
 
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth,
@@ -118,19 +125,21 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCount((prevCount) => prevCount + 1);
-    }, 1000);
+    let animationFrameId;
 
-    return () => clearInterval(timer);
-  }, []);
+    const render = () => {
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        const elapsedMs = Date.now() - START_TIME_MS;
+        addTimer(ctx, elapsedMs, dimensions.width, dimensions.height);
+      }
+      animationFrameId = requestAnimationFrame(render);
+    };
 
-  useEffect(() => {
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d');
-      addTimer(ctx, count, dimensions.width, dimensions.height);
-    }
-  }, [count]);
+    render();
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [dimensions]);
 
   return React.createElement('canvas', {
     ref: canvasRef,
