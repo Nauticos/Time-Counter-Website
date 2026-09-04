@@ -10,6 +10,7 @@ https://nauticos.github.io/Time-Counter-Website/ <= You can try out my website a
 This is an example of my website in action.
 
 There is a loading circle that lasts 10 seconds, and after 10 seconds the background colour changes.
+At the bottom of the screen it shows at what time you entered the site.
 
 The timer will keep counting forever, as long as you stay on the page. If you reload, it will reset.
 
