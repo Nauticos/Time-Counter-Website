@@ -1,4 +1,4 @@
-# Time-Counter-Website
+# Time Counter Website
 A basic website that counts the time spent on the website. It is made without using HTML tags.
 
 ![Thumbnail](Images/Thumbnail.png) This is an example of my website in action.
