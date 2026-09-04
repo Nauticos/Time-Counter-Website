@@ -1,5 +1,11 @@
 const { useState, useRef, useEffect } = React;
 
+const WEBSITE_START_TIME = new Date().toLocaleTimeString([], {
+  hour:'2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+});
+
 document.body.style.margin = '0';
 document.body.style.padding = '0';
 document.body.style.width = '100vw';
@@ -27,10 +33,28 @@ function addTimer(ctx, time, width, height) {
   const centerX = width / 2;
   const centerY = height / 2;
 
+  if (time > 0 && time % 10 === 0) {
+    const particleCount = 16;
+    const burstRadius = Math.min(width, height) * 0.28;
+
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i * (2 * Math.PI)) / particleCount;
+      const px = centerX + Math.cos(angle) * burstRadius;
+      const py = centerY + Math.sin(angle) * burstRadius;
+
+      ctx.beginPath();
+      ctx.arc(px, py, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 4;
+      ctx.fill();
+    }
+  }
+
   ctx.fillStyle = '#ffffff';
   ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
   ctx.shadowBlur = 6;
-  ctx.font = 'bold 32px "Courier New", monospace';
+  ctx.font = 'bold 40px "Courier New", monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('Time spent on website', centerX, centerY - 300);
@@ -63,6 +87,11 @@ function addTimer(ctx, time, width, height) {
   ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
   ctx.shadowBlur = 6;
   ctx.fillText(`${time}s`, centerX, centerY);
+
+  ctx.font = '16px "Courier New", monospace';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.shadowBlur = 4;
+  ctx.fillText(`Website opened at ${WEBSITE_START_TIME}`, centerX, height - 40);
 
   ctx.shadowColor = 'transparent';
 }
