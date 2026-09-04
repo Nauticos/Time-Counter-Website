@@ -3,9 +3,7 @@ A basic website that counts the time spent on the website. It is made without us
 <br/>
 
 **Demo Link**
-
 <br/>
-
 https://nauticos.github.io/Time-Counter-Website/ <= You can try out my website at this link.
 
 ![Thumbnail](Images/Thumbnail.png)
