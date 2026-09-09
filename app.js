@@ -60,10 +60,41 @@ function addTimer(ctx, elapsedMs, width, height) {
   ctx.font = 'bold 40px "Courier New", monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('Time spent on website', centerX, centerY - 250);
+  ctx.fillText('Time spent on website', centerX, centerY - 280);
+
+  if (totalSeconds >= 300) {
+    ctx.font = 'bold 22px "Courier New", monospace';
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 6;
+    ctx.fillText('why are you wasting your time here?', centerX, centerY - 90);
+  }
 
   const radius = Math.min(width, height) * 0.18;
   const startAngle = -Math.PI / 2;
+
+  const TARGET_GOAL_SECONDS = 300;
+  const outerRadius = radius + 24;
+  const targetFraction = Math.min(totalSeconds / TARGET_GOAL_SECONDS);
+  const targetEndAngle = startAngle + targetFraction * (2 * Math.PI);
+
+  ctx.shadowColor = 'transparent';
+
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.stroke();
+
+  if (targetFraction > 0) {
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, outerRadius, startAngle, targetEndAngle);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+
   const cycleMs = elapsedMs % 10000;
   const progressFraction = cycleMs / 10000;
   const endAngle = startAngle + progressFraction * (2 * Math.PI);
@@ -96,7 +127,7 @@ function addTimer(ctx, elapsedMs, width, height) {
   ctx.shadowBlur = 6;
   ctx.fillText(`${totalSeconds}s`, centerX, centerY);
 
-  ctx.font = '16px "Courier New", monospace';
+  ctx.font = '30px "Courier New", monospace';
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
   ctx.shadowBlur = 4;
   ctx.fillText(`Website opened at ${WEBSITE_START_TIME}`, centerX, height - 40);
